@@ -1,0 +1,36 @@
+import { readFileSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
+import { dirname, resolve } from 'node:path'
+import { describe, expect, it } from 'vitest'
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
+const css = readFileSync(resolve(__dirname, '../index.css'), 'utf8')
+
+describe('calendar grid styling', () => {
+  it('uses a desktop-visible tint for available dates and stronger emphasis for the first Sunday', () => {
+    // Available (shift) days: a soft amber that stays visible on desktop monitors
+    expect(css).toContain(
+      '.fc .fc-daygrid-day:not(.no-shift-day) {\n  background-color: #fef3c7;\n}'
+    )
+    expect(css).toContain(
+      '.fc .fc-daygrid-day:not(.no-shift-day):hover {\n  background-color: #fde68a;\n}'
+    )
+    // First Sunday (KRG) stays a step above the normal available tint
+    expect(css).toContain(
+      '.fc .fc-daygrid-day.first-sunday-krg {\n  background-color: #fde68a;\n}'
+    )
+    expect(css).toContain(
+      '.fc .fc-daygrid-day.first-sunday-krg:hover {\n  background-color: #fcd34d;\n}'
+    )
+    expect(css).not.toContain('box-shadow: inset 0 0 0 2px #94a3b8;')
+  })
+
+  it('renders non-shift days as plain white without greyed-out numbers', () => {
+    // BSG: only Sundays are coloured; every other day is simply white
+    expect(css).toContain(
+      '.fc .fc-daygrid-day.no-shift-day {\n  background-color: #ffffff;\n}'
+    )
+    // The KCG greyed day-number treatment is removed
+    expect(css).not.toContain('.fc-daygrid-day.no-shift-day .fc-daygrid-day-number')
+  })
+})
