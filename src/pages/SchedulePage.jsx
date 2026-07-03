@@ -1,12 +1,13 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import interactionPlugin from '@fullcalendar/interaction'
-import { format, parseISO } from 'date-fns'
+import { format, parseISO, addMonths, subMonths } from 'date-fns'
 import { supabase } from '../supabase'
 import Modal from '../components/Modal'
 import LoadingSpinner from '../components/LoadingSpinner'
 import { getDayCellClasses, getShiftTimeReminder } from './scheduleRules'
+import SundaysView from './SundaysView'
 
 export default function SchedulePage() {
   const [members, setMembers] = useState([])
@@ -18,6 +19,9 @@ export default function SchedulePage() {
   const [cancelReasons, setCancelReasons] = useState({})
   const [reminder, setReminder] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [viewMode, setViewMode] = useState('month')
+  const [viewDate, setViewDate] = useState(new Date())
+  const calendarRef = useRef(null)
 
   const fetchData = useCallback(async () => {
     try {
@@ -47,6 +51,13 @@ export default function SchedulePage() {
       shiftsSubscription.unsubscribe()
     }
   }, [fetchData])
+
+  // Sync FullCalendar to viewDate when switching back to month view
+  useEffect(() => {
+    if (viewMode === 'month' && calendarRef.current) {
+      calendarRef.current.getApi().gotoDate(viewDate)
+    }
+  }, [viewMode, viewDate])
 
   const events = shifts.map(shift => ({
     id: shift.id,
@@ -128,21 +139,60 @@ export default function SchedulePage() {
     <div className="space-y-6">
       {/* Calendar */}
       <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
-        <FullCalendar
-          plugins={[dayGridPlugin, interactionPlugin]}
-          initialView="dayGridMonth"
-          events={events}
-          dateClick={handleDateClick}
-          eventClick={(info) => handleDateClick({ dateStr: info.event.startStr })}
-          headerToolbar={{
-            left: 'prev,next today',
-            center: 'title',
-            right: 'dayGridMonth,dayGridWeek',
-          }}
-          height="auto"
-          dayMaxEvents={3}
-          dayCellClassNames={(arg) => getDayCellClasses(arg.date)}
-        />
+        {/* View mode toggle */}
+        <div className="flex justify-end mb-4">
+          <div className="flex gap-1 rounded-lg p-1 bg-slate-100">
+            <button
+              onClick={() => setViewMode('month')}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                viewMode === 'month'
+                  ? 'bg-indigo-500 text-white shadow-sm'
+                  : 'text-slate-500 hover:text-slate-700'
+              }`}
+            >
+              Month
+            </button>
+            <button
+              onClick={() => setViewMode('sundays')}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                viewMode === 'sundays'
+                  ? 'bg-indigo-500 text-white shadow-sm'
+                  : 'text-slate-500 hover:text-slate-700'
+              }`}
+            >
+              Sundays
+            </button>
+          </div>
+        </div>
+
+        {viewMode === 'month' ? (
+          <FullCalendar
+            ref={calendarRef}
+            plugins={[dayGridPlugin, interactionPlugin]}
+            initialView="dayGridMonth"
+            events={events}
+            dateClick={handleDateClick}
+            eventClick={(info) => handleDateClick({ dateStr: info.event.startStr })}
+            datesSet={(arg) => setViewDate(arg.view.currentStart)}
+            headerToolbar={{
+              left: 'prev,next today',
+              center: 'title',
+              right: '',
+            }}
+            height="auto"
+            dayMaxEvents={3}
+            dayCellClassNames={(arg) => getDayCellClasses(arg.date)}
+          />
+        ) : (
+          <SundaysView
+            year={viewDate.getFullYear()}
+            month={viewDate.getMonth()}
+            shifts={shifts}
+            onDateClick={(dateStr) => handleDateClick({ dateStr })}
+            onPrevMonth={() => setViewDate(prev => subMonths(prev, 1))}
+            onNextMonth={() => setViewDate(prev => addMonths(prev, 1))}
+          />
+        )}
       </div>
 
       {/* Legend & Hours */}
