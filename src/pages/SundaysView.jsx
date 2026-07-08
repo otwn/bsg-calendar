@@ -16,14 +16,14 @@ export default function SundaysView({ year, month, shifts, onDateClick, onPrevMo
       <div className="flex items-center justify-between mb-4">
         <button
           onClick={onPrevMonth}
-          className="px-3 py-2 rounded-lg text-sm font-medium bg-indigo-500 text-white hover:bg-indigo-600 transition-all"
+          className="px-3 py-2 rounded-lg text-sm font-medium bg-green-500 text-white hover:bg-green-600 transition-all"
         >
           Prev
         </button>
         <h2 className="text-xl font-semibold text-slate-800">{title}</h2>
         <button
           onClick={onNextMonth}
-          className="px-3 py-2 rounded-lg text-sm font-medium bg-indigo-500 text-white hover:bg-indigo-600 transition-all"
+          className="px-3 py-2 rounded-lg text-sm font-medium bg-green-500 text-white hover:bg-green-600 transition-all"
         >
           Next
         </button>

@@ -160,7 +160,7 @@ export default function ContactsPage() {
         {viewMode === 'active' && (
           <button
             onClick={() => handleOpenModal()}
-            className="flex items-center gap-2 px-4 py-2 bg-indigo-500 text-white font-medium rounded-lg hover:bg-indigo-600 transition-all"
+            className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white font-medium rounded-lg hover:bg-green-600 transition-all"
           >
             <Icons.Plus />
             Add Member
@@ -234,13 +234,13 @@ export default function ContactsPage() {
                 {member.email && (
                   <div className="flex items-center gap-2 text-slate-600">
                     <Icons.Email />
-                    <a href={`mailto:${member.email}`} className="hover:text-indigo-600">{member.email}</a>
+                    <a href={`mailto:${member.email}`} className="hover:text-green-600">{member.email}</a>
                   </div>
                 )}
                 {member.phone && (
                   <div className="flex items-center gap-2 text-slate-600">
                     <Icons.Phone />
-                    <a href={`tel:${member.phone}`} className="hover:text-indigo-600">{member.phone}</a>
+                    <a href={`tel:${member.phone}`} className="hover:text-green-600">{member.phone}</a>
                   </div>
                 )}
               </div>
@@ -273,7 +273,7 @@ export default function ContactsPage() {
                 <button
                   onClick={() => handleRestore(member)}
                   aria-label={`Restore ${member.name}`}
-                  className="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                  className="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-green-600 hover:bg-green-50 rounded-lg transition-colors"
                 >
                   <Icons.Undo />
                   Restore
@@ -326,7 +326,7 @@ export default function ContactsPage() {
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               placeholder="John Doe"
-              className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+              className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
             />
           </div>
 
@@ -337,7 +337,7 @@ export default function ContactsPage() {
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               placeholder="john@example.com"
-              className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+              className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
             />
           </div>
 
@@ -348,7 +348,7 @@ export default function ContactsPage() {
               value={formData.phone}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
               placeholder="555-0123"
-              className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+              className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
             />
           </div>
 
@@ -357,7 +357,7 @@ export default function ContactsPage() {
             <select
               value={formData.group_tag}
               onChange={(e) => setFormData({ ...formData, group_tag: e.target.value })}
-              className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+              className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
             >
               {GROUP_OPTIONS.map(opt => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -384,7 +384,7 @@ export default function ContactsPage() {
           <button
             onClick={handleSave}
             disabled={!formData.name.trim()}
-            className="w-full py-3 bg-indigo-500 text-white font-medium rounded-lg hover:bg-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            className="w-full py-3 bg-green-500 text-white font-medium rounded-lg hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
             {editingMember ? 'Save Changes' : 'Add Member'}
           </button>

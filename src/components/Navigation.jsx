@@ -18,7 +18,7 @@ export default function Navigation() {
       <div className="max-w-6xl mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center text-white">
+            <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center text-white">
               <Icons.Calendar />
             </div>
             <span className="font-semibold text-slate-800 text-lg">{CONFIG.appName}</span>
@@ -32,7 +32,7 @@ export default function Navigation() {
                 className={({ isActive }) =>
                   `flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
                     isActive
-                      ? 'bg-indigo-100 text-indigo-700'
+                      ? 'bg-green-100 text-green-700'
                       : 'text-slate-600 hover:bg-slate-100 hover:text-slate-800'
                   }`
                 }

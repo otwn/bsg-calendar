@@ -19,7 +19,7 @@ export default function Toast({ message, onUndo, onClose }) {
           <button
             onClick={onUndo}
             aria-label="Undo"
-            className="ml-2 px-2 py-1 text-sm font-medium text-indigo-300 hover:text-indigo-200 transition-colors"
+            className="ml-2 px-2 py-1 text-sm font-medium text-green-300 hover:text-green-200 transition-colors"
           >
             Undo
           </button>

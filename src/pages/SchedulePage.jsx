@@ -146,7 +146,7 @@ export default function SchedulePage() {
               onClick={() => setViewMode('month')}
               className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
                 viewMode === 'month'
-                  ? 'bg-indigo-500 text-white shadow-sm'
+                  ? 'bg-green-500 text-white shadow-sm'
                   : 'text-slate-500 hover:text-slate-700'
               }`}
             >
@@ -156,7 +156,7 @@ export default function SchedulePage() {
               onClick={() => setViewMode('sundays')}
               className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
                 viewMode === 'sundays'
-                  ? 'bg-indigo-500 text-white shadow-sm'
+                  ? 'bg-green-500 text-white shadow-sm'
                   : 'text-slate-500 hover:text-slate-700'
               }`}
             >
@@ -299,7 +299,7 @@ export default function SchedulePage() {
                   <select
                     value={selectedMember}
                     onChange={(e) => setSelectedMember(e.target.value)}
-                    className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                    className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
                   >
                     <option value="">Select a person...</option>
                     {availableMembers.map(member => (
@@ -311,7 +311,7 @@ export default function SchedulePage() {
                 <button
                   onClick={handleAssign}
                   disabled={!selectedMember}
-                  className="w-full py-3 bg-indigo-500 text-white font-medium rounded-lg hover:bg-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                  className="w-full py-3 bg-green-500 text-white font-medium rounded-lg hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                 >
                   Assign Shift
                 </button>
@@ -331,7 +331,7 @@ export default function SchedulePage() {
           <p className="text-slate-700">{reminder}</p>
           <button
             onClick={() => setReminder(null)}
-            className="w-full py-3 bg-indigo-500 text-white font-medium rounded-lg hover:bg-indigo-600 transition-all"
+            className="w-full py-3 bg-green-500 text-white font-medium rounded-lg hover:bg-green-600 transition-all"
           >
             Close
           </button>

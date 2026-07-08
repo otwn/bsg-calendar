@@ -25,10 +25,10 @@ describe('calendar grid styling', () => {
     expect(css).not.toContain('box-shadow: inset 0 0 0 2px #94a3b8;')
   })
 
-  it('renders non-shift days as plain white without greyed-out numbers', () => {
-    // BSG: only Sundays are coloured; every other day is simply white
+  it('greys out non-shift days so only shift Sundays stand out', () => {
+    // BSG: only shift Sundays are coloured; every other day is greyed out
     expect(css).toContain(
-      '.fc .fc-daygrid-day.no-shift-day {\n  background-color: #ffffff;\n}'
+      '.fc .fc-daygrid-day.no-shift-day {\n  background-color: #f1f5f9;\n}'
     )
     // The KCG greyed day-number treatment is removed
     expect(css).not.toContain('.fc-daygrid-day.no-shift-day .fc-daygrid-day-number')
