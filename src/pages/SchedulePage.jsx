@@ -8,8 +8,9 @@ import Modal from '../components/Modal'
 import LoadingSpinner from '../components/LoadingSpinner'
 import { getDayCellClasses, getShiftTimeReminder } from './scheduleRules'
 import SundaysView from './SundaysView'
+import { DEFAULT_REGION } from '../lib/regions'
 
-export default function SchedulePage() {
+export default function SchedulePage({ selectedRegion = DEFAULT_REGION }) {
   const [members, setMembers] = useState([])
   const [shifts, setShifts] = useState([])
   const [selectedDate, setSelectedDate] = useState(null)
@@ -26,8 +27,8 @@ export default function SchedulePage() {
   const fetchData = useCallback(async () => {
     try {
       const [membersRes, shiftsRes] = await Promise.all([
-        supabase.from('bsg_active_members').select('*').order('name'),
-        supabase.from('bsg_shifts').select('*, bsg_members(*)'),
+        supabase.from('bsg_active_members').select('*').eq('region_name', selectedRegion).order('name'),
+        supabase.from('bsg_shifts').select('*, bsg_members(*)').eq('region_name', selectedRegion),
       ])
 
       if (membersRes.data) setMembers(membersRes.data)
@@ -37,14 +38,18 @@ export default function SchedulePage() {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [selectedRegion])
 
   useEffect(() => {
     fetchData()
 
     const shiftsSubscription = supabase
-      .channel('bsg-shifts-changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'bsg_shifts' }, fetchData)
+      .channel(`bsg-shifts-changes-${selectedRegion}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'bsg_shifts', filter: `region_name=eq.${selectedRegion}` },
+        fetchData
+      )
       .subscribe()
 
     return () => {
@@ -86,6 +91,7 @@ export default function SchedulePage() {
       const { data: newShift } = await supabase.from('bsg_shifts').insert({
         member_id: selectedMember,
         shift_date: selectedDate,
+        region_name: selectedRegion,
       }).select('*, bsg_members(*)').single()
 
       const member = members.find(m => m.id === selectedMember)

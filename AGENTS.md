@@ -149,3 +149,10 @@ _Not initialized yet. Run `/init` to populate this section._
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <!-- Working state below: appended by /start-feature, /design-tracker, and manual notes. -->
+
+## Current Feature: Region-Scoped Calendar and Members
+
+- Goal: Select a region and show only that region's members and calendar shifts.
+- Key files: `src/App.jsx`, `src/pages/SchedulePage.jsx`, `src/pages/ContactsPage.jsx`, `supabase/migrations/20260712120000_add_regions.sql`.
+- Architecture: `bsg_region_cities` drives the dropdown; `region_name` scopes operational data.
+- Decision: Austin/Greater Austin is detected locally with a 75-mile radius; manual selection takes precedence.

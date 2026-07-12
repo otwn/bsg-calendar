@@ -44,15 +44,30 @@ CREATE TABLE bsg_members (
   phone TEXT,
   color TEXT DEFAULT '#6366f1',
   group_tag TEXT DEFAULT 'b',  -- 'b' | 's' | 'g' | 's/g'
+  region_name TEXT NOT NULL DEFAULT 'central_texas',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   deleted_at TIMESTAMPTZ DEFAULT NULL  -- soft delete timestamp
 );
 
 CREATE INDEX idx_bsg_members_deleted_at ON bsg_members(deleted_at);
+CREATE INDEX idx_bsg_members_region_active ON bsg_members(region_name) WHERE deleted_at IS NULL;
+
+-- Region city mappings power the selector. Add more rows to support more regions.
+CREATE TABLE bsg_region_cities (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  region_name TEXT NOT NULL,
+  city TEXT NOT NULL UNIQUE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+INSERT INTO bsg_region_cities (region_name, city) VALUES
+  ('central_texas', 'austin'),
+  ('central_texas', 'killeen'),
+  ('central_texas', 'waco');
 
 -- View: only active (non-deleted) members
-CREATE OR REPLACE VIEW bsg_active_members AS
-  SELECT id, name, email, phone, color, group_tag, created_at
+CREATE OR REPLACE VIEW bsg_active_members WITH (security_invoker = true) AS
+  SELECT id, name, email, phone, color, group_tag, created_at, region_name
   FROM bsg_members
   WHERE deleted_at IS NULL;
 
@@ -63,8 +78,11 @@ CREATE TABLE bsg_shifts (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   member_id UUID REFERENCES bsg_members(id) ON DELETE CASCADE,
   shift_date DATE NOT NULL,
+  region_name TEXT NOT NULL DEFAULT 'central_texas',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+CREATE INDEX idx_bsg_shifts_region_date ON bsg_shifts(region_name, shift_date);
 
 -- History table (audit log)
 CREATE TABLE bsg_history (
@@ -81,11 +99,14 @@ CREATE TABLE bsg_history (
 ALTER TABLE bsg_members ENABLE ROW LEVEL SECURITY;
 ALTER TABLE bsg_shifts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE bsg_history ENABLE ROW LEVEL SECURITY;
+ALTER TABLE bsg_region_cities ENABLE ROW LEVEL SECURITY;
 
 -- Policies to allow all operations (since no auth required)
 CREATE POLICY "Allow all" ON bsg_members FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Allow all" ON bsg_shifts FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Allow all" ON bsg_history FOR ALL USING (true) WITH CHECK (true);
+GRANT SELECT ON bsg_region_cities TO anon, authenticated;
+CREATE POLICY "Public region map is readable" ON bsg_region_cities FOR SELECT TO anon, authenticated USING (true);
 
 -- Insert some sample members
 INSERT INTO bsg_members (name, email, phone, color, group_tag) VALUES

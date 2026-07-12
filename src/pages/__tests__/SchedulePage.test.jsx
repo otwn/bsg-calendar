@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 const mockMembersOrder = vi.fn()
-const mockShiftsSelect = vi.fn()
+const mockMembersEq = vi.fn()
+const mockShiftsEq = vi.fn()
 
 vi.mock('../../supabase', () => ({
   supabase: {
@@ -9,7 +10,7 @@ vi.mock('../../supabase', () => ({
       if (table === 'bsg_active_members') {
         return {
           select: vi.fn().mockReturnValue({
-            order: mockMembersOrder,
+            eq: mockMembersEq,
           }),
         }
       }
@@ -23,9 +24,9 @@ vi.mock('../../supabase', () => ({
       }
       if (table === 'bsg_shifts') {
         return {
-          select: mockShiftsSelect.mockReturnValue(
-            Promise.resolve({ data: [] })
-          ),
+          select: vi.fn().mockReturnValue({
+            eq: mockShiftsEq,
+          }),
         }
       }
       return { select: vi.fn() }
@@ -50,8 +51,9 @@ const MOCK_ACTIVE_MEMBERS = [
 describe('SchedulePage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    mockMembersEq.mockReturnValue({ order: mockMembersOrder })
     mockMembersOrder.mockResolvedValue({ data: MOCK_ACTIVE_MEMBERS })
-    mockShiftsSelect.mockReturnValue(Promise.resolve({ data: [] }))
+    mockShiftsEq.mockResolvedValue({ data: [] })
   })
 
   it('queries bsg_active_members view (not bsg_members table)', async () => {
@@ -90,6 +92,23 @@ describe('SchedulePage', () => {
       // bsg_members table should never be queried directly for the member list
       const membersCalls = fromCalls.filter(c => c[0] === 'bsg_members')
       expect(membersCalls.length).toBe(0)
+    })
+  })
+
+  it('filters members and shifts by the selected region', async () => {
+    const { default: SchedulePage } = await import('../SchedulePage')
+    const { render, waitFor } = await import('@testing-library/react')
+    const { MemoryRouter } = await import('react-router-dom')
+
+    render(
+      <MemoryRouter>
+        <SchedulePage selectedRegion="north_texas" />
+      </MemoryRouter>
+    )
+
+    await waitFor(() => {
+      expect(mockMembersEq).toHaveBeenCalledWith('region_name', 'north_texas')
+      expect(mockShiftsEq).toHaveBeenCalledWith('region_name', 'north_texas')
     })
   })
 })
