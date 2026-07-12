@@ -80,7 +80,15 @@ CREATE POLICY "Allow all" ON bsg_history FOR ALL USING (true) WITH CHECK (true);
    - **Project URL** (e.g., `https://xyz.supabase.co`)
    - **anon public key** (starts with `eyJ...`)
 
-### Step 2: Configure the App
+### Step 2: Add Region Support
+
+Run [`supabase/migrations/20260712120000_add_regions.sql`](supabase/migrations/20260712120000_add_regions.sql)
+in the Supabase SQL Editor after the base schema. It creates the `bsg_region_cities` table,
+seeds `central_texas` for Austin, Killeen, and Waco, and scopes members and shifts with a
+`region_name` column. The Region dropdown reads this table, so add cities and regions there
+before using them in the app.
+
+### Step 3: Configure the App
 
 1. Copy `.env.example` to `.env`:
    ```bash
@@ -93,7 +101,7 @@ CREATE POLICY "Allow all" ON bsg_history FOR ALL USING (true) WITH CHECK (true);
    VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIs...
    ```
 
-### Step 3: Run Locally (Optional)
+### Step 4: Run Locally (Optional)
 
 ```bash
 npm install
@@ -102,7 +110,7 @@ npm run dev
 
 Open [http://localhost:5173](http://localhost:5173)
 
-### Step 4: Deploy to Netlify (Free)
+### Step 5: Deploy to Netlify (Free)
 
 **Option A: One-Click Deploy**
 1. Push this code to GitHub

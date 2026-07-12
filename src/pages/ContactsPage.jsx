@@ -4,6 +4,7 @@ import { Icons } from '../components/Icons'
 import Modal from '../components/Modal'
 import Toast from '../components/Toast'
 import LoadingSpinner from '../components/LoadingSpinner'
+import { DEFAULT_REGION } from '../lib/regions'
 
 const COLORS = ['#6366f1', '#ec4899', '#14b8a6', '#f59e0b', '#8b5cf6', '#ef4444', '#22c55e', '#3b82f6']
 
@@ -16,7 +17,7 @@ const GROUP_OPTIONS = [
   { value: 's/g', label: 'Sokahan / Gajokai (s/g)' },
 ]
 
-export default function ContactsPage() {
+export default function ContactsPage({ selectedRegion = DEFAULT_REGION }) {
   const [members, setMembers] = useState([])
   const [removedMembers, setRemovedMembers] = useState([])
   const [loading, setLoading] = useState(true)
@@ -36,21 +37,23 @@ export default function ContactsPage() {
     const { data } = await supabase
       .from('bsg_active_members')
       .select('*')
+      .eq('region_name', selectedRegion)
       .order('name')
 
     if (data) setMembers(data)
     setLoading(false)
-  }, [])
+  }, [selectedRegion])
 
   const fetchRemovedMembers = useCallback(async () => {
     const { data } = await supabase
       .from('bsg_members')
       .select('*')
       .not('deleted_at', 'is', null)
+      .eq('region_name', selectedRegion)
       .order('name')
 
     if (data) setRemovedMembers(data)
-  }, [])
+  }, [selectedRegion])
 
   useEffect(() => {
     fetchMembers()
@@ -73,9 +76,13 @@ export default function ContactsPage() {
 
     try {
       if (editingMember) {
-        await supabase.from('bsg_members').update(formData).eq('id', editingMember.id)
+        await supabase
+          .from('bsg_members')
+          .update({ ...formData, region_name: selectedRegion })
+          .eq('id', editingMember.id)
+          .eq('region_name', selectedRegion)
       } else {
-        await supabase.from('bsg_members').insert(formData)
+        await supabase.from('bsg_members').insert({ ...formData, region_name: selectedRegion })
       }
       setIsModalOpen(false)
       fetchMembers()
@@ -91,6 +98,7 @@ export default function ContactsPage() {
       .from('bsg_shifts')
       .select('id')
       .eq('member_id', member.id)
+      .eq('region_name', selectedRegion)
       .gte('shift_date', today)
 
     setUpcomingShiftCount(upcomingShifts?.length || 0)
@@ -105,6 +113,7 @@ export default function ContactsPage() {
         .from('bsg_members')
         .update({ deleted_at: new Date().toISOString() })
         .eq('id', confirmMember.id)
+        .eq('region_name', selectedRegion)
 
       await supabase.from('bsg_history').insert({
         member_id: confirmMember.id,
@@ -132,6 +141,7 @@ export default function ContactsPage() {
         .from('bsg_members')
         .update({ deleted_at: null })
         .eq('id', member.id)
+        .eq('region_name', selectedRegion)
 
       await supabase.from('bsg_history').insert({
         member_id: member.id,

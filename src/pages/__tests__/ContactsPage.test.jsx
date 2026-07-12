@@ -4,11 +4,17 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 // Separate mock chains for active_members vs members (removed)
 const mockActiveOrder = vi.fn()
+const mockActiveEq = vi.fn()
 const mockRemovedOrder = vi.fn()
+const mockRemovedNot = vi.fn()
+const mockRemovedEq = vi.fn()
 const mockUpdate = vi.fn()
-const mockEq = vi.fn()
+const mockUpdateById = vi.fn()
+const mockUpdateByRegion = vi.fn()
 const mockInsert = vi.fn()
 const mockMemberInsert = vi.fn()
+const mockShiftMemberEq = vi.fn()
+const mockShiftRegionEq = vi.fn()
 const mockShiftGte = vi.fn()
 
 vi.mock('../../supabase', () => ({
@@ -17,20 +23,17 @@ vi.mock('../../supabase', () => ({
       if (table === 'bsg_active_members') {
         return {
           select: vi.fn().mockReturnValue({
-            order: mockActiveOrder,
+            eq: mockActiveEq,
           }),
         }
       }
       if (table === 'bsg_members') {
         return {
           select: vi.fn().mockReturnValue({
-            order: vi.fn(), // unused in this path
-            not: vi.fn().mockReturnValue({
-              order: mockRemovedOrder,
-            }),
+            not: mockRemovedNot,
           }),
           update: mockUpdate.mockReturnValue({
-            eq: mockEq,
+            eq: mockUpdateById,
           }),
           insert: mockMemberInsert,
         }
@@ -38,9 +41,7 @@ vi.mock('../../supabase', () => ({
       if (table === 'bsg_shifts') {
         return {
           select: vi.fn().mockReturnValue({
-            eq: vi.fn().mockReturnValue({
-              gte: mockShiftGte,
-            }),
+            eq: mockShiftMemberEq,
           }),
         }
       }
@@ -68,8 +69,15 @@ const MOCK_REMOVED = [
 describe('ContactsPage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    mockActiveEq.mockReturnValue({ order: mockActiveOrder })
     mockActiveOrder.mockResolvedValue({ data: MOCK_MEMBERS })
+    mockRemovedNot.mockReturnValue({ eq: mockRemovedEq })
+    mockRemovedEq.mockReturnValue({ order: mockRemovedOrder })
     mockRemovedOrder.mockResolvedValue({ data: [] })
+    mockUpdateById.mockReturnValue({ eq: mockUpdateByRegion })
+    mockUpdateByRegion.mockResolvedValue({ data: null })
+    mockShiftMemberEq.mockReturnValue({ eq: mockShiftRegionEq })
+    mockShiftRegionEq.mockReturnValue({ gte: mockShiftGte })
   })
 
   it('renders active members by default', async () => {
@@ -83,7 +91,6 @@ describe('ContactsPage', () => {
 
   it('soft delete sets deleted_at (not hard delete)', async () => {
     mockShiftGte.mockResolvedValue({ data: [], count: 0 })
-    mockEq.mockResolvedValue({ data: null })
     mockInsert.mockResolvedValue({ data: null })
 
     const user = userEvent.setup()
@@ -127,7 +134,6 @@ describe('ContactsPage', () => {
 
   it('toast appears after delete with undo button', async () => {
     mockShiftGte.mockResolvedValue({ data: [], count: 0 })
-    mockEq.mockResolvedValue({ data: null })
     mockInsert.mockResolvedValue({ data: null })
 
     const user = userEvent.setup()
@@ -154,7 +160,6 @@ describe('ContactsPage', () => {
 
   it('undo restores member (clears deleted_at)', async () => {
     mockShiftGte.mockResolvedValue({ data: [], count: 0 })
-    mockEq.mockResolvedValue({ data: null })
     mockInsert.mockResolvedValue({ data: null })
 
     const user = userEvent.setup()
@@ -222,8 +227,17 @@ describe('ContactsPage', () => {
 
     await waitFor(() => {
       expect(mockMemberInsert).toHaveBeenCalledWith(
-        expect.objectContaining({ name: 'Koichi Onogi', group_tag: 's/g' })
+        expect.objectContaining({ name: 'Koichi Onogi', group_tag: 's/g', region_name: 'central_texas' })
       )
+    })
+  })
+
+  it('filters member queries by the selected region', async () => {
+    render(<ContactsPage selectedRegion="north_texas" />)
+
+    await waitFor(() => {
+      expect(mockActiveEq).toHaveBeenCalledWith('region_name', 'north_texas')
+      expect(mockRemovedEq).toHaveBeenCalledWith('region_name', 'north_texas')
     })
   })
 })
